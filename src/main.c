@@ -1,52 +1,55 @@
 #include <stdio.h>
+#include <getopt.h>
 #include <stdlib.h>
-#include <unistd.h>
-
-// mycalc [option] op1 op2
-// options:
-// -a(no argument)   : add
-// -m(no argument)   : multiply
-// -d(no argument)   : divide
-// -s(no argument)   : subtract
-// -M(need argument) : output string
-//
-// mycalc -a 10 20  -----------> 30
-// mycalc -m 2 16 -M result ---> result: 20
 
 int main(int argc, char **argv)
 {
     opterr = 0;
 
-    int a_flag = 0, m_flag = 0, d_flag = 0, s_flag = 0, M_flag = 0;
-    char *M_arg;
+    struct option options[] =
+        {
+            {"all", no_argument, NULL, 1},
+            {"length", required_argument, NULL, 2},
+            {"number", optional_argument, NULL, 3},
+            {0, 0, 0, 0},
+        };
+
+    int a_flag = 0, b_flag = 0, all_flag = 0, length_flag = 0, number_flag = 0;
+    char *b_arg, *length_arg, *number_arg = NULL;
     int error_flag = 0;
 
     int result;
-    while ((result = getopt(argc, argv, "amdsM:")) != -1)
+    while ((result = getopt_long(argc, argv, "ab:", options, NULL)) != -1)
     {
         switch (result)
         {
         case 'a':
             a_flag = 1;
             break;
-        case 'm':
-            m_flag = 1;
+        case 'b':
+            b_flag = 1;
+            b_arg = optarg;
             break;
-        case 'd':
-            d_flag = 1;
+        case 1:
+            all_flag = 1;
             break;
-        case 's':
-            s_flag = 1;
+        case 2:
+            length_flag = 1;
+            length_arg = optarg;
             break;
-        case 'M':
-            M_flag = 1;
-            M_arg = optarg;
+        case 3:
+            number_flag = 1;
+            number_arg = optarg;
             break;
         case '?':
-            if (optopt == 'M')
-                fprintf(stderr, "-M option must have an argument!\n");
+            if (optopt == 'b')
+                fprintf(stderr, "ERR: -b option must have an argument!\n");
+            else if (optopt == 2)
+                fprintf(stderr, "ERR: --length option must have an argument!\n");
+            else if (optopt != 0)
+                fprintf(stderr, "ERR: Invalid short option used: -%c\n", optopt);
             else
-                fprintf(stderr, "Invalid option: -%c\n", optopt);
+                fprintf(stderr, "ERR: Invalid long option used\n");
 
             error_flag = 1;
         }
@@ -55,37 +58,24 @@ int main(int argc, char **argv)
     if (error_flag)
         exit(EXIT_FAILURE);
 
-    if (a_flag + m_flag + d_flag + s_flag > 1)
-    {
-        fprintf(stderr, "Only one option must be specified!\n");
-        exit(EXIT_FAILURE);
-    }
-    else if (a_flag + m_flag + d_flag + s_flag == 0)
-    {
-        fprintf(stderr, "At least one of -{amds} options must be specified!\n");
-        exit(EXIT_FAILURE);
-    }
-
-    if (argc - optind != 2)
-    {
-        fprintf(stderr, "Two operand must be specified!\n");
-        exit(EXIT_FAILURE);
-    }
-
-    double op1 = atof(argv[optind]), op2 = atof(argv[optind + 1]);
-    double calc_result;
-
     if (a_flag)
-        calc_result = op1 + op2;
-    else if (m_flag)
-        calc_result = op1 * op2;
-    else if (d_flag)
-        calc_result = op1 / op2;
-    if (s_flag)
-        calc_result = op1 - op2;
+        fprintf(stdout, "-a option used.\n");
+    if (b_flag)
+        fprintf(stdout, "-b option used with argument: \"%s\"\n", b_arg);
+    if (all_flag)
+        fprintf(stdout, "--all option used.\n");
+    if (length_flag)
+        fprintf(stdout, "--length option used with argument: \"%s\"\n", length_arg);
+    if (number_flag)
+    {
+        if (number_arg)
+            fprintf(stdout, "--number option used with argument: \"%s\"\n", number_arg);
+        else
+            fprintf(stdout, "--number option used without argument.\n");
+    }
 
-    if (M_flag)
-        fprintf(stdout, "%s: %f\n", M_arg, calc_result);
-    else
-        fprintf(stdout, "%f\n", calc_result);
+    if (optind != argc)
+        fprintf(stdout, "Arguments without option: \n");
+    for (size_t i = optind; i < argc; ++i)
+        fprintf(stdout, "%s\n", argv[i]);
 }
