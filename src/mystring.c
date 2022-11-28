@@ -26,3 +26,10 @@ char *mystrrev(char *str)
     return str;
 }
 
+char *mystrchr(const char *str, int ch)
+{
+    const char *ptr;
+    for (ptr = str; *ptr != '\0' && *ptr != ch; ++ptr)
+        ;
+    return *ptr == '\0' ? NULL : (char *)ptr;
+}
