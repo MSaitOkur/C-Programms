@@ -1,5 +1,5 @@
 linker: clean
-	gcc -g -std=c99 -Wall  -I "./inc/" -lm \
+	gcc -g  -Wall  -I "./inc/" -lm \
 	./src/utility.c ./src/mystring.c ./src/main.c ./src/csd_pwd.c ./src/csd_grp.c \
 	-o test 
 

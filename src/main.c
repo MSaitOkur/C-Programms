@@ -1,29 +1,99 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "csd_grp.h"
-#include <errno.h>
-#include <grp.h>
+#include <fcntl.h>
+#include <unistd.h>
 
-int main(int argc, char **argv)
+void exit_sys(const char *msg);
+
+int main(void)
 {
-    struct group *grp;
+    int fd;
 
-    csd_setgrent();
-    while ((errno = 0, grp = csd_getgrent()) != NULL)
-    {
-        puts("\n=====================================================");
-        fprintf(stdout, "Group name     : %s\n", grp->gr_name);
-        fprintf(stdout, "Group password : %s\n", grp->gr_passwd);
-        fprintf(stdout, "Group ID       : %llu\n", (unsigned long long)grp->gr_gid);
+    if ((fd = open("test.txt", O_RDONLY)) == -1) // success
+        exit_sys("open");
 
-        fprintf(stdout, "Supplementary group members : ");
-        for (size_t i = 0; grp->gr_mem[i] != NULL; ++i)
-            fprintf(stdout, "%s, ", grp->gr_mem[i]);
+    fprintf(stdout, "OK.\n");
 
-    }
+    close(fd);
 
-    if (errno)
-        perror("csd_getgrnam");
+    return 0;
+}
 
-    csd_endgrent();
+void exit_sys(const char *msg)
+{
+    perror(msg);
+
+    exit(EXIT_FAILURE);
+}
+
+// =====================================
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+void exit_sys(const char *msg);
+
+int main(void)
+{
+    int fddir;
+    if ((fddir = open("/usr/include", O_RDONLY)) == -1)
+        exit_sys("open");
+
+    int fd;
+    if ((fd = openat(fddir, "test.txt", O_RDONLY)) == -1)
+        exit_sys("open");
+    // openat fonksiyonu test.txt dosyasini fddir dizin dosya betimleyicisinde arayacak
+    // ve bulursa basarili bulamazsa basarisiz olacak
+
+    fprintf(stdout, "OK.\n");
+
+    close(fd);
+
+    return 0;
+}
+
+void exit_sys(const char *msg)
+{
+    perror(msg);
+
+    exit(EXIT_FAILURE);
+}
+
+//=====================================
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+void exit_sys(const char *msg);
+
+int main(void)
+{
+    int fddir;
+    if ((fddir = open("/usr/include", O_RDONLY)) == -1)
+        exit_sys("open");
+
+    int fd;
+    if ((fd = openat(fddir, "/home/sait/Desktop/GitSoftwareStudy/C-Programs/test.txt", O_RDONLY)) == -1)
+        exit_sys("open");
+    // openat fonksiyonuna mutlak yol ifadesi gonderilirse bu durumda
+    // 1. parametreye gonderilen dizin dosya betimleyicisinin hicbir anlami kalmaz.
+    // openat aynen open gibi mutlak yol ifadesinde test.txt dosyasini arayacak
+    // ve bulursa basari olacak.
+
+    fprintf(stdout, "OK.\n");
+
+    close(fd);
+
+    return 0;
+}
+
+void exit_sys(const char *msg)
+{
+    perror(msg);
+
+    exit(EXIT_FAILURE);
 }
