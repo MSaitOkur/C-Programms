@@ -1,6 +1,6 @@
 linker: clean
-	gcc -g  -Wall  -I "./inc/" -lm \
-	./src/utility.c ./src/mystring.c ./src/main.c ./src/csd_pwd.c ./src/csd_grp.c \
+	gcc -Wall -I "./inc/" -lm \
+	./src/main.c \
 	-o test 
 
 clean: 
